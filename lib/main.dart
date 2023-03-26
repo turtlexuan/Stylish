@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:flutter/services.dart';
+import 'package:stylish/model/category_item.dart';
+import 'package:stylish/model/highlight_item.dart';
 
 void main() {
   runApp(const MyApp());
@@ -50,6 +54,14 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    // Call the readJson method when the app starts
+    readHighlihgtItem();
+    readCategoryItem();
+  }
+
   void _incrementCounter() {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -59,6 +71,26 @@ class _MyHomePageState extends State<MyHomePage> {
       // called again, and so nothing would appear to happen.
       _counter++;
     });
+  }
+
+  Future<void> readHighlihgtItem() async {
+    final String jsonString =
+        await rootBundle.loadString('assets/highlight_items.json');
+    final List data = await json.decode(jsonString)["highlights"];
+    final highlihgts =
+        data.map((item) => HighlihgtItem.fromJson(item)).toList();
+    // ...
+    print(highlihgts);
+  }
+
+  Future<void> readCategoryItem() async {
+    final String jsonString =
+        await rootBundle.loadString('assets/main_page_items.json');
+    final List data = await json.decode(jsonString)["categories"];
+    final categories =
+        data.map((item) => CategoryItem.fromJson(item)).toList();
+    // ...
+    print(categories);
   }
 
   @override
