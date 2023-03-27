@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:stylish/model/category_item.dart';
@@ -52,7 +53,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  CategoryItem currentCategory = CategoryItem(
+    cats: [],
+    name: '',
+  );
+  List<HighlihgtItem> highlightItems = [];
+  List<CategoryItem> categorieItems = [];
 
   @override
   void initState() {
@@ -62,86 +68,90 @@ class _MyHomePageState extends State<MyHomePage> {
     readCategoryItem();
   }
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
   Future<void> readHighlihgtItem() async {
     final String jsonString =
         await rootBundle.loadString('assets/highlight_items.json');
     final List data = await json.decode(jsonString)["highlights"];
-    final highlihgts =
+    final highlights =
         data.map((item) => HighlihgtItem.fromJson(item)).toList();
     // ...
-    print(highlihgts);
+    setState(() {
+      highlightItems = highlights;
+    });
   }
 
   Future<void> readCategoryItem() async {
     final String jsonString =
         await rootBundle.loadString('assets/main_page_items.json');
     final List data = await json.decode(jsonString)["categories"];
-    final categories =
-        data.map((item) => CategoryItem.fromJson(item)).toList();
+    final categories = data.map((item) => CategoryItem.fromJson(item)).toList();
     // ...
-    print(categories);
+    setState(() {
+      categorieItems = categories;
+      currentCategory = categories.first;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+        appBar: AppBar(
+          title: Text(widget.title),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+        body: Column(
+          children: [
+            SizedBox(
+              height: 200,
+              child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  shrinkWrap: true,
+                  itemCount: highlightItems.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Container(
+                      padding: const EdgeInsets.fromLTRB(5, 15, 5, 15),
+                      width: 300,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Image.network(
+                          highlightItems[index].imageUrl,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    );
+                  }),
+            ),
+            DropdownButton<CategoryItem>(
+              value: currentCategory,
+              items: categorieItems.map<DropdownMenuItem<CategoryItem>>((CategoryItem value) {
+                return DropdownMenuItem<CategoryItem>(
+                  value: value,
+                  child: Text(value.name),
+                );
+              }).toList(),
+              onChanged: (CategoryItem? value) {
+                setState(() {
+                  currentCategory = value!;
+                });
+              },
+            ),
+            ListView.builder(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              itemCount: currentCategory.cats.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Container(
+                  padding: const EdgeInsets.fromLTRB(10, 15, 10, 15),
+                  height: 80,
+                  child: Row(children: [
+                    Image.network(currentCategory.cats[index].imageUrl),
+                    Column(children: [
+                      Text(currentCategory.cats[index].name),
+                      Text("Age: ${currentCategory.cats[index].age}"),
+                    ],)
+                  ]),
+                );
+            })
+          ],
+        ));
   }
 }
