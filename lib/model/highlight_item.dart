@@ -1,4 +1,3 @@
-import 'dart:ffi';
 
 class HighlihgtItem {
   final String imageUrl;

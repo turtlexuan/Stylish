@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:stylish/Widget/category_list_view.dart';
+import 'package:stylish/Widget/highlight_view.dart';
 import 'package:stylish/model/category_item.dart';
 import 'package:stylish/model/highlight_item.dart';
+import 'package:stylish/model/item.dart';
+import 'item_detail_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -54,7 +57,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   CategoryItem currentCategory = CategoryItem(
-    cats: [],
+    items: [],
     name: '',
   );
   List<HighlihgtItem> highlightItems = [];
@@ -94,64 +97,90 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
     return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-        ),
+        appBar: const StylishAppBar(),
         body: Column(
           children: [
-            SizedBox(
-              height: 200,
-              child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  shrinkWrap: true,
-                  itemCount: highlightItems.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Container(
-                      padding: const EdgeInsets.fromLTRB(5, 15, 5, 15),
-                      width: 300,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: Image.network(
-                          highlightItems[index].imageUrl,
-                          fit: BoxFit.cover,
+            HighlightView(highlightItems: highlightItems),
+            if (width > 750) ...[
+              Expanded(
+                child: Row(
+                  children: [
+                    for (CategoryItem item in categorieItems) ...[
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(item.name),
+                            CategoryListView(
+                              category: item,
+                              onTap: (item) {
+                                pushToDetialPage(item);
+                              },
+                            ),
+                          ],
                         ),
-                      ),
-                    );
-                  }),
-            ),
-            DropdownButton<CategoryItem>(
-              value: currentCategory,
-              items: categorieItems.map<DropdownMenuItem<CategoryItem>>((CategoryItem value) {
-                return DropdownMenuItem<CategoryItem>(
-                  value: value,
-                  child: Text(value.name),
-                );
-              }).toList(),
-              onChanged: (CategoryItem? value) {
-                setState(() {
-                  currentCategory = value!;
-                });
-              },
-            ),
-            ListView.builder(
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              itemCount: currentCategory.cats.length,
-              itemBuilder: (BuildContext context, int index) {
-                return Container(
-                  padding: const EdgeInsets.fromLTRB(10, 15, 10, 15),
-                  height: 80,
-                  child: Row(children: [
-                    Image.network(currentCategory.cats[index].imageUrl),
-                    Column(children: [
-                      Text(currentCategory.cats[index].name),
-                      Text("Age: ${currentCategory.cats[index].age}"),
-                    ],)
-                  ]),
-                );
-            })
+                      )
+                    ]
+                  ],
+                ),
+              ),
+            ] else ...[
+              DropdownButton<CategoryItem>(
+                value: currentCategory,
+                items: categorieItems
+                    .map<DropdownMenuItem<CategoryItem>>((CategoryItem value) {
+                  return DropdownMenuItem<CategoryItem>(
+                    value: value,
+                    child: Text(value.name),
+                  );
+                }).toList(),
+                onChanged: (CategoryItem? value) {
+                  setState(() {
+                    currentCategory = value!;
+                  });
+                },
+              ),
+              CategoryListView(
+                category: currentCategory,
+                onTap: (item) {
+                  pushToDetialPage(item);
+                },
+              )
+            ],
           ],
         ));
+  }
+
+  void pushToDetialPage(Item item) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ItemDetailPage(),
+      ),
+    );
+  }
+}
+
+class StylishAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const StylishAppBar({
+    super.key,
+  });
+
+  @override
+  Size get preferredSize => const Size.fromHeight(56);
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Image.asset(
+          'Image_Logo.png',
+          fit: BoxFit.contain,
+          height: 32,
+        )
+      ]),
+      backgroundColor: const Color.fromRGBO(242, 242, 242, 1),
+    );
   }
 }
