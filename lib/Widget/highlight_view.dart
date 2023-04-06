@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../model/highlight_item.dart';
 
+// ignore: must_be_immutable
 class HighlightView extends StatelessWidget {
   HighlightView({super.key, required this.highlightItems});
 

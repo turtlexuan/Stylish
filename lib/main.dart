@@ -6,7 +6,9 @@ import 'package:stylish/Widget/highlight_view.dart';
 import 'package:stylish/model/category_item.dart';
 import 'package:stylish/model/highlight_item.dart';
 import 'package:stylish/model/item.dart';
+import 'package:stylish/util/utilities.dart';
 import 'item_detail_page.dart';
+import 'package:stylish/Widget/stylish_app_bar.dart';
 
 void main() {
   runApp(const MyApp());
@@ -97,13 +99,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
     return Scaffold(
         appBar: const StylishAppBar(),
         body: Column(
           children: [
             HighlightView(highlightItems: highlightItems),
-            if (width > 750) ...[
+            if (isWideScreen(context)) ...[
               Expanded(
                 child: Row(
                   children: [
@@ -158,29 +159,6 @@ class _MyHomePageState extends State<MyHomePage> {
       MaterialPageRoute(
         builder: (context) => const ItemDetailPage(),
       ),
-    );
-  }
-}
-
-class StylishAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const StylishAppBar({
-    super.key,
-  });
-
-  @override
-  Size get preferredSize => const Size.fromHeight(56);
-
-  @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Image.asset(
-          'Image_Logo.png',
-          fit: BoxFit.contain,
-          height: 32,
-        )
-      ]),
-      backgroundColor: const Color.fromRGBO(242, 242, 242, 1),
     );
   }
 }
