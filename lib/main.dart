@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:stylish/Service/product_list_service.dart';
 import 'package:stylish/Widget/category_list_view.dart';
 import 'package:stylish/Widget/highlight_view.dart';
 import 'package:stylish/model/category_item.dart';
 import 'package:stylish/model/highlight_item.dart';
 import 'package:stylish/model/item.dart';
+import 'package:stylish/model/product_item.dart';
 import 'package:stylish/util/utilities.dart';
 import 'item_detail_page.dart';
 import 'package:stylish/Widget/stylish_app_bar.dart';
@@ -65,12 +67,29 @@ class _MyHomePageState extends State<MyHomePage> {
   List<HighlihgtItem> highlightItems = [];
   List<CategoryItem> categorieItems = [];
 
+  ProductListService service = ProductListService();
+
   @override
   void initState() {
     super.initState();
     // Call the readJson method when the app starts
     readHighlihgtItem();
     readCategoryItem();
+
+    // service.fetchProductList().then((data) => {print(data.toString())});
+    fetchProducts().then((lists) => {
+          for (var list in lists) {print(list.length)}
+        });
+  }
+
+  Future<List<List<Product>>> fetchProducts() async {
+    var responses = await Future.wait([
+      service.fetchManProductList(),
+      service.fetchWomanProductList(),
+      service.fetchAccessoryList()
+    ]);
+
+    return responses;
   }
 
   Future<void> readHighlihgtItem() async {
